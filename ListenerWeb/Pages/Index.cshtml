@@ -1,0 +1,37 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Home page";
+}
+<div id="inputForm">
+    <input type="text" id="message" />
+    <input type="button" id="sendBtn" value="Send" />
+</div>
+<div id="chatroom"></div>
+
+<script src="signalr.min.js"></script>
+<script src="signlarRMessage.min.js"></script>
+
+<script>
+    const hubConnection = new signalR.HubConnectionBuilder()
+        .withUrl("https://localhost:44313/chat")
+        //.withHubProtocol(new signalR.protocols.msgpack.MessagePackHubProtocol())
+        .build();
+
+    hubConnection.on("ReceiveMessage", function (data) {
+
+        let elem = document.createElement("p");
+        elem.appendChild(document.createTextNode(data));
+        let firstElem = document.getElementById("chatroom").firstChild;
+        document.getElementById("chatroom").insertBefore(elem, firstElem);
+
+    });
+
+    document.getElementById("sendBtn").addEventListener("click", function (e) {
+            let message = document.getElementById("message").value;
+            hubConnection.invoke("SendNotification", message);
+        });
+
+
+    hubConnection.start();
+</script>
